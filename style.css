@@ -1,0 +1,5 @@
+/* Styles go here */
+
+a[ng-click]{
+    cursor: pointer;
+}
