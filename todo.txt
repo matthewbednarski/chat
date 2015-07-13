@@ -1,0 +1,7 @@
+
+x 2015-07-12 (A) 2015-07-11 highlight connected peers in +peers list 
+(B) 2015-07-12 show nice switch toggle instead of checkboxes
+
+(A) 2015-07-11 start +chat upon initial connection 
+x 2015-07-11 (A) 2015-07-11 +poll for peers 
+
