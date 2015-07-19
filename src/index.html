@@ -22,8 +22,9 @@
   -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.2/css/bootstrap3/bootstrap-switch.css"
     rel="stylesheet" />
-    <script src="stream-factory.js"></script>
-    <script src="persist-service.js"></script>
+    <script src="js/persist-service.js"></script>
+    <script src="js/stream-service.js"></script>
+    <script src="js/peer-service.js"></script>
     <script src="switch-directive.js"></script>
     <link href="switch-directive.css" rel="stylesheet" />
     <script src="script.js"></script>
@@ -48,12 +49,20 @@
         <!-- <div ng-show="ctl.peer.peer_id.indexOf('test_ast_') >= 0 ">-->
         <div class="panel panel-info">
             <div class="panel panel-heading">
-                <a data-toggle="collapse" href="#collapseList">There are {{ ctl.peer.peers.list.length }} peers available.</a>
+                <div class="row">
+                    <!-- <a data&#45;toggle="collapse" href="#collapseList">There are {{ ctl.peer.peers.list.length }} peers available.</a> -->
+                    <div class="input-group form-group col-*-6">
+                        <div class="input-append">
+                            <input class="form-control" name="filter" placeholder="There are {{ ctl.peer.peers.list.length }} peers available."
+                            ng-model="ctl.peer_list_filter.peer_id" />
+                        </div>
+                        <span class="input-group-addon"><i class="fa fa-filter"></i></span>
+                    </div>
+                </div>
             </div>
-            <div class="collapse panel-body" id="collapseList">
-
+            <div class="panel-body" id="collapseList">
                 <ul>
-                    <li class="list-unstyled" ng-repeat="item in ctl.peer.peers.list">
+                    <li class="list-unstyled" ng-repeat="item in ctl.peer.peers.list | filter:ctl.peer_list_filter">
                         <button class="btn bg-success btn-block" ng-click="ctl.connect(item);">
                             <span class="badge bg-danger pull-left">
 								<input type="checkbox" name="my-checkbox" ng-checked="item.data !== undefined"/>
@@ -63,13 +72,27 @@
             </div>
         </div>
     </div>
-    <div class="panel col-sm-12 col-md-9 col-lg-9">
+
+    <div class="row">
+        <div class="embed-responsive embed-responsive-4by3 col-sm-7 col-md-7 col-lg-7">
+            {{ ctl.peer.peers.connection[item.peer_id].remote_stream }}
+            <!-- service.peers.connection[c.peer].remote_stream = URL.createObjectURL(remoteStream); -->
+            <video class="embed-responsive-item" ng-src="{{ ctl.peer.peers.connection[item.peer_id].remote_stream }}"
+            controls autoplay></video>
+        </div>
+        <div class="embed-responsive embed-responsive-16by9 col-sm-5 col-md-5 col-lg-5">
+            {{ ctl.peer.peers.connection[item.peer_id].local_stream }}
+            <video class="embed-responsive-item" ng-src="{{ ctl.peer.peers.connection[item.peer_id].local_stream }}"
+            controls autoplay></video>
+        </div>
+    </div>
+    <div class="panel col-sm-12 col-md-9 col-lg-6">
         <div class="panel panel-info" ng-repeat="item in ctl.peer.connections">
             <div class="panel panel-heading">
                 <a data-toggle="collapse" href="#chat">Chat {{ item.peer_id }}</a>
                 <a ng-click="ctl.closeConnection(item);"><i class="fa fa-times fa-3 pull-right"></i></a>
             </div>
-            <div id="chat" class="panel panel-body collapse">
+            <div id="chat" class="panel panel-body">
                 <div ng-repeat="msg in item.data.chat.messages">
                     <div ng-show="msg.peer !== ctl.peer.peer_id">
                         <h4><span class="label label-warning">Them:</span></h4><span>{{ msg.data }}</span>
@@ -88,7 +111,7 @@
             </span>
                     </div>
                     <div class="btn-group">
-                        <button ng-click="ctl.call(item);" type="button" class="btn btn-success"><i class="fa fa-phone fa-3"></i>
+                        <button ng-click="ctl.call(item);" type="button" class="btn btn-success"><i class="fa fa-phone fa-3"></i> 
                         </button>
                         <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown"
                         aria-haspopup="true" aria-expanded="false">
@@ -99,36 +122,14 @@
                             <button ng-click="ctl.video(item);" class="btn btn-success"><i class="fa fa-video-camera fa-3"></i>
                             </button>
                         </div>
+                        <!-- <div ng&#45;show="ctl.peer.peers.connection !== undefined &#38;&#38; ctl.peer.peers.connection[item.peer_id] !== undefined &#38;&#38; ctl.peer.peers.connection[item.peer_id].remote_stream !== undefined"> -->
+                        <button ng-click="ctl.hangUp(item);" type="button" class="btn btn-danger"><i class="fa fa-phone fa-3 fa-rotate-135"></i> 
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    <div ng-show="ctl.video.them" class="panel panel-success">
-        <div class="panel panel-heading">
-            <a data-toggle="collapse" href="#them">Them</a>
-        </div>
-        <div id="them" class="panel panel-body collapse" area-expanded="false" aria-controls="them">
-            <div class="embed-responsive embed-responsive-16by9">
-                <!-- <video class="embed&#45;responsive&#45;item" src="{{ ctl.peer.peers.call.in.url }}" controls -->
-                <!-- autoplay></video> -->
-                {{ ctl.peer.peers.call.out.url }}
-            </div>
-        </div>
-    </div>
-    <div ng-show="ctl.video.you" class="panel panel-danger">
-        <div class="panel panel-heading">
-            <a data-toggle="collapse" href="#you">You</a>
-        </div>
-        <div id="you" class="panel panel-body collapse" area-expanded="false" area-controls="you">
-            <div class="embed-responsive embed-responsive-16by9">
-                <!-- <video class="embed&#45;responsive&#45;item" src="{{ ctl.peer.peers.call.out.url }}" controls -->
-                <!-- autoplay></video> -->
-            </div>
-        </div>
-    </div>
-
-
 </body>
 
 </html>
