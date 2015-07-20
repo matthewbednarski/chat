@@ -6,6 +6,7 @@
 <head>
     <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"></link>
 
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!-- <script  src="https://code.angularjs.org/1.3.16/angular.js"></script> -->
     <!-- <script src="http://code.jquery.com/jquery&#45;2.1.4.min.js" data&#45;semver="2.1.4" data&#45;require="jquery@*"></script> -->
     <!-- <script data&#45;require="bootstrap@*" data&#45;semver="3.3.1" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script> -->
@@ -34,102 +35,97 @@
 </head>
 
 <body ng-controller="controller as ctl" ng-app="app">
-    <div class="panel">
-        <!-- <switch ng&#45;model="ctl.enabled" ng&#45;click="alert(ctl);" class="gray" /> -->
+    <div class="container">
         <input ng-model="ctl.peer.peer_id" class="form-control" readonly/>
-        <!--placeholder="Insert a chat ID, eg '1234' or 'your_name12'" />-->
-        <!--
-    <button ng-show="ctl.user !== undefined" 
-    </button>
-    -->
         <button class="btn btn-danger btn-inverse" ng-click="ctl.bootstrapPeer();">Start</button>
         <button ng-show="ctl.peer.peer_id !== undefined" class="btn btn-danger" ng-click="ctl.closePeer();">End</button>
     </div>
-    <div ng-show="ctl.peer.peer_id !== undefined" class="panel col-sm-12 col-md-3 col-lg-3">
-        <!-- <div ng-show="ctl.peer.peer_id.indexOf('test_ast_') >= 0 ">-->
-        <div class="panel panel-info">
-            <div class="panel panel-heading">
-                <div class="row">
-                    <!-- <a data&#45;toggle="collapse" href="#collapseList">There are {{ ctl.peer.peers.list.length }} peers available.</a> -->
-                    <div class="input-group form-group col-*-6">
-                        <div class="input-append">
-                            <input class="form-control" name="filter" placeholder="There are {{ ctl.peer.peers.list.length }} peers available."
-                            ng-model="ctl.peer_list_filter.peer_id" />
-                        </div>
-                        <span class="input-group-addon"><i class="fa fa-filter"></i></span>
-                    </div>
+    <div class="container-fluid ">
+        <div class="row">
+            <div ng-show="ctl.peer.peer_id !== undefined" class="col-xs-12 col-sm-6 col-md-8 col-lg-9 col-sm-push-6 col-md-push-4 col-md-push-3">
+                <div class="embed-responsive embed-responsive-4by3 col-sm-7 col-md-7 col-lg-7">
+                    {{ ctl.peer.peers.connection[item.peer_id].remote_stream }}
+                    <!-- service.peers.connection[c.peer].remote_stream = URL.createObjectURL(remoteStream); -->
+                    <video class="embed-responsive-item" ng-src="{{ ctl.peer.peers.connection[item.peer_id].remote_stream }}"
+                    controls autoplay></video>
+                </div>
+                <div class="embed-responsive embed-responsive-16by9 col-sm-5 col-md-5 col-lg-5">
+                    {{ ctl.peer.peers.connection[item.peer_id].local_stream }}
+                    <video class="embed-responsive-item" ng-src="{{ ctl.peer.peers.connection[item.peer_id].local_stream }}"
+                    controls autoplay></video>
                 </div>
             </div>
-            <div class="panel-body" id="collapseList">
-                <ul>
-                    <li class="list-unstyled" ng-repeat="item in ctl.peer.peers.list | filter:ctl.peer_list_filter">
-                        <button class="btn bg-success btn-block" ng-click="ctl.connect(item);">
-                            <span class="badge bg-danger pull-left">
+            <div ng-show="ctl.peer.peer_id !== undefined" class="col-xs-12 col-sm-6 col-md-4 col-lg-3 col-sm-pull-6 col-md-pull-8 col-md-pull-9">
+                <div class="panel panel-info">
+                    <div class="panel panel-heading">
+                        <div class="row">
+                            <div class="input-group form-group col-*-6">
+                                <div class="input-append">
+                                    <input class="form-control" name="filter" placeholder="There are {{ ctl.peer.peers.list.length }} peers available."
+                                    ng-model="ctl.peer_list_filter.peer_id" />
+                                </div>
+                                <span class="input-group-addon"><i class="fa fa-filter"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body" id="collapseList">
+                        <ul>
+                            <li class="list-unstyled" ng-repeat="item in ctl.peer.peers.list | filter:ctl.peer_list_filter">
+                                <button class="btn bg-success btn-block" ng-click="ctl.connect(item);">
+                                    <span class="badge bg-danger pull-left">
 								<input type="checkbox" name="my-checkbox" ng-checked="item.data !== undefined"/>
 							</span>{{item.peer_id}}</button>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="embed-responsive embed-responsive-4by3 col-sm-7 col-md-7 col-lg-7">
-            {{ ctl.peer.peers.connection[item.peer_id].remote_stream }}
-            <!-- service.peers.connection[c.peer].remote_stream = URL.createObjectURL(remoteStream); -->
-            <video class="embed-responsive-item" ng-src="{{ ctl.peer.peers.connection[item.peer_id].remote_stream }}"
-            controls autoplay></video>
-        </div>
-        <div class="embed-responsive embed-responsive-16by9 col-sm-5 col-md-5 col-lg-5">
-            {{ ctl.peer.peers.connection[item.peer_id].local_stream }}
-            <video class="embed-responsive-item" ng-src="{{ ctl.peer.peers.connection[item.peer_id].local_stream }}"
-            controls autoplay></video>
-        </div>
-    </div>
-    <div class="panel col-sm-12 col-md-9 col-lg-6">
-        <div class="panel panel-info" ng-repeat="item in ctl.peer.connections">
-            <div class="panel panel-heading">
-                <a data-toggle="collapse" href="#chat">Chat {{ item.peer_id }}</a>
-                <a ng-click="ctl.closeConnection(item);"><i class="fa fa-times fa-3 pull-right"></i></a>
-            </div>
-            <div id="chat" class="panel panel-body">
-                <div ng-repeat="msg in item.data.chat.messages">
-                    <div ng-show="msg.peer !== ctl.peer.peer_id">
-                        <h4><span class="label label-warning">Them:</span></h4><span>{{ msg.data }}</span>
-                    </div>
-                    <div ng-show="msg.peer === ctl.peer.peer_id" class="pull-right">
-                        <h4><span class="label label-info">You:</span></h4><span>{{ msg.data }}</span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
-            <div class="panel panel-footer">
-                <form>
-                    <div class="input-group">
-                        <input ng-model="ctl.chat_next" type="text" class="form-control" />
-                        <span class="input-group-btn" id="basic-addon1">
-              <button ng-click="ctl.send(item);" type="submit" class="btn btn-send"><i class="glyphicon glyphicon-share-alt"></i></button>
-            </span>
-                    </div>
-                    <div class="btn-group">
-                        <button ng-click="ctl.call(item);" type="button" class="btn btn-success"><i class="fa fa-phone fa-3"></i> 
-                        </button>
-                        <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false">
-                            <span class="caret"></span>
-                            <span class="sr-only">Toggle Dropdown</span>
-                        </button>
-                        <div class="dropdown-menu">
-                            <button ng-click="ctl.video(item);" class="btn btn-success"><i class="fa fa-video-camera fa-3"></i>
-                            </button>
-                        </div>
-                        <!-- <div ng&#45;show="ctl.peer.peers.connection !== undefined &#38;&#38; ctl.peer.peers.connection[item.peer_id] !== undefined &#38;&#38; ctl.peer.peers.connection[item.peer_id].remote_stream !== undefined"> -->
-                        <button ng-click="ctl.hangUp(item);" type="button" class="btn btn-danger"><i class="fa fa-phone fa-3 fa-rotate-135"></i> 
-                        </button>
-                    </div>
-                </form>
-            </div>
         </div>
     </div>
+    <!-- <div class="panel col&#45;sm&#45;12 col&#45;md&#45;9 col&#45;lg&#45;6"> -->
+    <!--     <div class="panel panel&#45;info" ng&#45;repeat="item in ctl.peer.connections"> -->
+    <!--         <div class="panel panel&#45;heading"> -->
+    <!--             <a data&#45;toggle="collapse" href="#chat">Chat {{ item.peer_id }}</a> -->
+    <!--             <a ng&#45;click="ctl.closeConnection(item);"><i class="fa fa&#45;times fa&#45;3 pull&#45;right"></i></a> -->
+    <!--         </div> -->
+    <!--         <div id="chat" class="panel panel&#45;body"> -->
+    <!--             <div ng&#45;repeat="msg in item.data.chat.messages"> -->
+    <!--                 <div ng&#45;show="msg.peer !== ctl.peer.peer_id"> -->
+    <!--                     <h4><span class="label label&#45;warning">Them:</span></h4><span>{{ msg.data }}</span> -->
+    <!--                 </div> -->
+    <!--                 <div ng&#45;show="msg.peer === ctl.peer.peer_id" class="pull&#45;right"> -->
+    <!--                     <h4><span class="label label&#45;info">You:</span></h4><span>{{ msg.data }}</span> -->
+    <!--                 </div> -->
+    <!--             </div> -->
+    <!--         </div> -->
+    <!--         <div class="panel panel&#45;footer"> -->
+    <!--             <form> -->
+    <!--                 <div class="input&#45;group"> -->
+    <!--                     <input ng&#45;model="ctl.chat_next" type="text" class="form&#45;control" /> -->
+    <!--                     <span class="input&#45;group&#45;btn" id="basic&#45;addon1"> -->
+    <!--           <button ng&#45;click="ctl.send(item);" type="submit" class="btn btn&#45;send"><i class="glyphicon glyphicon&#45;share&#45;alt"></i></button> -->
+    <!--         </span> -->
+    <!--                 </div> -->
+    <!--                 <div class="btn&#45;group"> -->
+    <!--                     <button ng&#45;click="ctl.call(item);" type="button" class="btn btn&#45;success"><i class="fa fa&#45;phone fa&#45;3"></i>  -->
+    <!--                     </button> -->
+    <!--                     <button type="button" class="btn btn&#45;success dropdown&#45;toggle" data&#45;toggle="dropdown" -->
+    <!--                     aria&#45;haspopup="true" aria&#45;expanded="false"> -->
+    <!--                         <span class="caret"></span> -->
+    <!--                         <span class="sr&#45;only">Toggle Dropdown</span> -->
+    <!--                     </button> -->
+    <!--                     <div class="dropdown&#45;menu"> -->
+    <!--                         <button ng&#45;click="ctl.video(item);" class="btn btn&#45;success"><i class="fa fa&#45;video&#45;camera fa&#45;3"></i> -->
+    <!--                         </button> -->
+    <!--                     </div> -->
+    <!--                     <!&#45;&#45; <div ng&#38;#45;show="ctl.peer.peers.connection !== undefined &#38;#38;&#38;#38; ctl.peer.peers.connection[item.peer_id] !== undefined &#38;#38;&#38;#38; ctl.peer.peers.connection[item.peer_id].remote_stream !== undefined"> &#45;&#45;> -->
+    <!--                     <button ng&#45;click="ctl.hangUp(item);" type="button" class="btn btn&#45;danger"><i class="fa fa&#45;phone fa&#45;3 fa&#45;rotate&#45;135"></i>  -->
+    <!--                     </button> -->
+    <!--                 </div> -->
+    <!--             </form> -->
+    <!--         </div> -->
+    <!--     </div> -->
+    <!-- </div> -->
 </body>
 
 </html>
