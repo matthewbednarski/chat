@@ -1,15 +1,9 @@
-
-PeerJS Example
+Chat
 ==============
 
+A PeerJS video chat client
+
 A [peerjs](http://peerjs.com/) test app.
-
-This example simulates a help-desk.
-
-There are 2 types of clients, **User** and **Assistent**.
-
-
-##Start 
 
 
 
