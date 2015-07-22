@@ -1,9 +1,9 @@
 (function(app_name) {
     var app = angular.module('app', ['ngSwitch', 'mcbPeer'])
-        .controller('controller', ['$q', '$scope', 'peer', Controller]);
+        .controller('controller', ['$q', '$scope', 'peer', 'call', Controller]);
     // .directive('chat', [Chat]);
 
-    function Controller($q, $scope, peer) {
+    function Controller($q, $scope, peer, call) {
         this.title = "Welcome ";
         var ctl = this;
         this.items = [];
@@ -36,19 +36,17 @@
         };
         this.video = function(item) {
             // this.peer_id = item;
-            this.peer.call(item, 'video').then(function() {
+            call.call(item, 'video', peer).then(function() {
                 $scope.$apply();
             });
         };
         this.call = function(item) {
-            // this.peer_id = item;
-            // this.peer.call(item, 'audio').then(function() {
-            this.peer.call(item, 'audio_video').then(function() {
+            call.call(item, 'audio_video', peer).then(function() {
             	console.log(ctl.peer.peers.connection);
             });
         };
         this.hangUp = function(item) {
-            this.peer.hangUp(item);
+            call.hangUp(item);
 		};
         this.bootstrapPeer = function() {
             ctl.peer.startup($scope, ctl.peer.peer_prefix + ctl.user);

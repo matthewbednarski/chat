@@ -1,9 +1,129 @@
 (function() {
     var module = angular.module('mcbPeer', ['mcbPersist', 'mcbStream']);
 
-    module.service('peer', ['$q', '$rootScope', '$sce', 'persist', 'stream', PeerService])
+    module.service('call', ['$q', '$sce', 'stream', CallService])
+    module.service('peer', ['$q', '$rootScope', '$sce', 'persist', 'stream', 'call', PeerService])
 
-    function PeerService($q, $rootScope, $sce, persist, stream) {
+    function CallService($q, $sce, streamSvc) {
+        var service = this;
+        service.previous = [];
+
+        this.hangUp = function(peer_obj) {
+            if (service.current !== undefined) {
+                if (service.current.call !== undefined) {
+                    service.current.call.close();
+                }
+                service.previous.push(service.current);
+                service.current = undefined;
+            }
+        };
+        this.call = function(peer_obj, streamType, peer, metadata) {
+            var defer = $q.defer();
+            var s = undefined;
+            if (streamType === 'video_only') {
+                s = stream.getVideoOnly();
+            } else if (streamType === 'audio') {
+                s = stream.getAudio();
+            } else if (streamType === 'audio_video') {
+                s = stream.get();
+            }
+            s.then(function(stream) {
+                var call = peer.call(peer_obj.peer_id, stream, {
+                    metadata: {
+                        stream_type: streamType
+                    }
+                });
+                var c = call;
+                c.peer = peer_obj.peer_id;
+                if (service.current === undefined) {
+                    service.current = {};
+                }
+                if (c.metadata !== undefined) {
+                    if (service.current.info === undefined) {
+                        service.current.info = {};
+                    }
+                    _.assign(service.current.info, c.metadata);
+                }
+                service.current.call = c;
+                service.current.local_stream = $sce.trustAsResourceUrl(URL.createObjectURL(stream));
+                call.on('stream', function(remoteStream) {
+                    // Show stream in some video/canvas element.
+                    service.current.remote_stream = $sce.trustAsResourceUrl(URL.createObjectURL(remoteStream));
+                    defer.resolve(service.current);
+                });
+                call.on('close', function() {
+                    service.current.local_stream = undefined;
+                    service.current.remote_stream = undefined;
+                    service.previous.push(service.current);
+                    service.current = undefined;
+                });
+                call.on('error', function(err) {
+                    console.error(err);
+                    service.current.local_stream = undefined;
+                    service.current.remote_stream = undefined;
+                    service.previous.push(service.current);
+                    service.current = undefined;
+                });
+            }, function(err) {
+                console.log('Failed to get local stream', err);
+                defer.reject(new Error(err));
+            });
+            return defer.promise;
+        };
+        this.registerHandlers = function(peer) {
+            console.log('PeerService: Registering Handlers');
+            peer.on('call', function(call) {
+                var c = call;
+                if (service.current === undefined) {
+                    service.current = {};
+                }
+                if (c.metadata !== undefined) {
+                    if (service.current.info === undefined) {
+                        service.current.info = {};
+                    }
+                    _.assign(service.current.info, c.metadata);
+                }
+                service.current.call = c;
+                var streamType = 'audio_video';
+                if (c.metadata !== undefined && c.metadata.stream_type !== undefined) {
+                    streamType = c.metadata.stream_type;
+                }
+                if (streamType === 'video_only') {
+                    s = streamSvc.getVideoOnly();
+                } else if (streamType === 'audio') {
+                    s = streamSvc.getAudio();
+                } else if (streamType === 'audio_video') {
+                    s = streamSvc.get();
+                }
+                s.then(function(stream) {
+                    service.current.local_stream = $sce.trustAsResourceUrl(URL.createObjectURL(stream));
+                    call.answer(stream); // Answer the call with an A/V stream.
+                    call.on('stream', function(remoteStream) {
+                        // Show stream in some video/canvas element.
+                        service.current.remote_stream = $sce.trustAsResourceUrl(URL.createObjectURL(remoteStream));
+                    });
+                    call.on('close', function() {
+                        service.current.local_stream = undefined;
+                        service.current.remote_stream = undefined;
+                        service.previous.push(service.current);
+                        service.current = undefined;
+                    });
+                    call.on('error', function(err) {
+                        console.error(err);
+                        service.current.local_stream = undefined;
+                        service.current.remote_stream = undefined;
+                        service.previous.push(service.current);
+                        service.current = undefined;
+                    });
+                }, function(err) {
+                    console.log('Failed to get local stream', err);
+                });
+            });
+        };
+
+    }
+
+    function PeerService($q, $rootScope, $sce, persist, stream, call) {
         var service = this;
         this.peers = {
             list: [],
@@ -11,6 +131,43 @@
             connection: {}
         };
         this.connections = [];
+
+        this.startup = function() {
+            var defer = $q.defer();
+            service.peer = new Peer({
+                key: 'lwjd5qra8257b9',
+                // key: 'x7fwx2kavpy6tj4i',
+                // Set highest debug level (log everything!).
+                debug: 3,
+
+                // Set a logging function:
+                logFunction: function() {
+                    var copy = Array.prototype.slice.call(arguments).join(' ');
+                    $('.log').append(copy + '<br>');
+                },
+
+                // Use a TURN server for more network support
+                config: {
+                    'iceServers': [{
+                        url: 'stun:stun.l.google.com:19302'
+                    }]
+                }
+            });
+            service.peer.on('open', function(id) {
+                console.log('My peer ID is: ' + id);
+                service.peer_id = id;
+                defer.resolve(id);
+                var reg = call.registerHandlers(service.peer);
+                defer.promise.then(reg);
+                console.log(service);
+                pollPeers(service);
+            });
+            service.peer.on('connection', function(conn) {
+                console.log("handling incoming connection.");
+                connect(conn, service);
+            });
+            return defer.promise;
+        };
         this.listConnections = function() {
             var defer = $q.defer();
 
@@ -111,38 +268,6 @@
             service.listConnections();
         }
 
-        this.startup = function() {
-            var defer = $q.defer();
-            service.peer = new Peer({
-                key: 'lwjd5qra8257b9',
-                // key: 'x7fwx2kavpy6tj4i',
-                // Set highest debug level (log everything!).
-                debug: 3,
-
-                // Set a logging function:
-                logFunction: function() {
-                    var copy = Array.prototype.slice.call(arguments).join(' ');
-                    $('.log').append(copy + '<br>');
-                },
-
-                // Use a TURN server for more network support
-                config: {
-                    'iceServers': [{
-                        url: 'stun:stun.l.google.com:19302'
-                    }]
-                }
-            });
-            service.peer.on('open', function(id) {
-                console.log('My peer ID is: ' + id);
-                service.peer_id = id;
-                defer.resolve(id);
-                var reg = _.bind(service.registerHandlers, service);
-                defer.promise.then(reg);
-                console.log(service);
-                pollPeers(service);
-            });
-            return defer.promise;
-        };
 
         function pollPeers(service) {
             console.log("polling Peers...");
@@ -180,121 +305,6 @@
             leading: true,
             trailing: false
         });
-
-        this.registerHandlers = function() {
-            var peer = service.peer;
-            console.log('PeerService: Registering Handlers');
-            peer.on('call', function(call) {
-                var c = call;
-                var peers = service.peers;
-                if (service.peers.connection[c.peer] === undefined) {
-                    service.peers.connection[c.peer] = {};
-                    service.peers.connection[c.peer].connected = {};
-                }
-                if (c.metadata !== undefined) {
-                    if (peers.connection[c.peer].info === undefined) {
-                        peers.connection[c.peer].info = {};
-                    }
-                    _.assign(peers.connection[c.peer].info, c.metadata);
-                }
-                service.peers.connection[c.peer].call = c;
-                var streamType = 'audio_video';
-                if (c.metadata !== undefined && c.metadata.stream_type !== undefined) {
-                    streamType = c.metadata.stream_type;
-                }
-                if (streamType === 'video_only') {
-                    s = stream.getVideoOnly();
-                } else if (streamType === 'audio') {
-                    s = stream.getAudio();
-                } else if (streamType === 'audio_video') {
-                    s = stream.get();
-                }
-                s.then(function(stream) {
-                    service.peers.connection[c.peer].local_stream = $sce.trustAsResourceUrl(URL.createObjectURL(stream));
-                    call.answer(stream); // Answer the call with an A/V stream.
-                    call.on('stream', function(remoteStream) {
-                        // Show stream in some video/canvas element.
-                        service.peers.connection[c.peer].remote_stream = $sce.trustAsResourceUrl(URL.createObjectURL(remoteStream));
-                    });
-                    call.on('close', function() {
-                        service.peers.connection[c.peer].local_stream = undefined;
-                        service.peers.connection[c.peer].remote_stream = undefined;
-                    });
-                    call.on('error', function(err) {
-                        console.error(err);
-                        service.peers.connection[c.peer].local_stream = undefined;
-                        service.peers.connection[c.peer].remote_stream = undefined;
-                    });
-                }, function(err) {
-                    console.log('Failed to get local stream', err);
-                });
-            });
-            peer.on('connection', function(conn) {
-                console.log("handling incoming connection.");
-                connect(conn, service);
-            });
-        };
-
-        this.hangUp = function(peer) {
-            var peer_id = peer.peer_id;
-            var peers = service.peers;
-            if (service.peers.connection[peer_id] !== undefined) {
-                if (service.peers.connection[c.peer].call !== undefined) {
-                    service.peers.connection[c.peer].call.close();
-                }
-            }
-        };
-        this.call = function(peer, streamType, metadata) {
-            var defer = $q.defer();
-            var s = undefined;
-            if (streamType === 'video_only') {
-                s = stream.getVideoOnly();
-            } else if (streamType === 'audio') {
-                s = stream.getAudio();
-            } else if (streamType === 'audio_video') {
-                s = stream.get();
-            }
-            s.then(function(stream) {
-                var call = service.peer.call(peer.peer_id, stream, {
-                    metadata: {
-                        stream_type: streamType
-                    }
-                });
-                var c = call;
-                c.peer = peer.peer_id;
-                var peers = service.peers;
-                if (service.peers.connection[c.peer] === undefined) {
-                    service.peers.connection[c.peer] = {};
-                    service.peers.connection[c.peer].connected = {};
-                }
-                if (c.metadata !== undefined) {
-                    if (peers.connection[c.peer].info === undefined) {
-                        peers.connection[c.peer].info = {};
-                    }
-                    _.assign(peers.connection[c.peer].info, c.metadata);
-                }
-                service.peers.connection[c.peer].call = c;
-                service.peers.connection[c.peer].local_stream = $sce.trustAsResourceUrl(URL.createObjectURL(stream));
-                call.on('stream', function(remoteStream) {
-                    // Show stream in some video/canvas element.
-                    service.peers.connection[c.peer].remote_stream = $sce.trustAsResourceUrl(URL.createObjectURL(remoteStream));
-                    defer.resolve(service.peers.connection[c.peer].remote_stream);
-                });
-                call.on('close', function() {
-                    service.peers.connection[c.peer].local_stream = undefined;
-                    service.peers.connection[c.peer].remote_stream = undefined;
-                });
-                call.on('error', function(err) {
-                    console.error(err);
-                    service.peers.connection[c.peer].local_stream = undefined;
-                    service.peers.connection[c.peer].remote_stream = undefined;
-                });
-            }, function(err) {
-                console.log('Failed to get local stream', err);
-                defer.reject(new Error(err));
-            });
-            return defer.promise;
-        };
 
         this.connectToPeer = function(rem_id, metadata) {
             var defer = $q.defer();
