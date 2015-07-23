@@ -1,9 +1,9 @@
 (function(app_name) {
     var app = angular.module('app', ['ngSwitch', 'mcbPeer'])
-        .controller('controller', ['$q', '$scope', 'peer', 'call', Controller]);
+        .controller('controller', ['$q', '$scope', '$peer', '$call', Controller]);
     // .directive('chat', [Chat]);
 
-    function Controller($q, $scope, peer, call) {
+    function Controller($q, $scope, $peer, $call) {
         this.title = "Welcome ";
         var ctl = this;
         this.items = [];
@@ -12,8 +12,8 @@
             audio: true
         };
 
-        this.peer = peer;
-        this.call = call;
+        this.$peer = $peer;
+        this.$call = $call;
 
         $scope.$on('msgReceived', function(event, msg) {
             $scope.$apply(function() {
@@ -23,44 +23,44 @@
         this.send = function(item) {
             console.log(ctl.chat_next);
             var msg = {
-                peer: ctl.peer.peer_id,
+                peer: ctl.$peer.peer_id,
                 data: ctl.chat_next
             };
-            this.peer.peers.connection[item.peer_id].chat.messages.push(msg);
-            this.peer.peers.connection[item.peer_id].chat.send(msg.data);
+            this.$peer.peers.connection[item.peer_id].chat.messages.push(msg);
+            this.$peer.peers.connection[item.peer_id].chat.send(msg.data);
 
             ctl.chat_next = "";
         };
         this.connect = function(peer) {
             var metadata = {};
-            this.peer.connectToPeer(peer.peer_id, metadata);
+            this.$peer.connectToPeer(peer.peer_id, metadata);
         };
         this.video = function(item) {
             // this.peer_id = item;
-            call.call(item, 'video', this.peer.peer).then(function() {
+            this.$call.call(item, 'video', this.$peer.peer).then(function() {
                 $scope.$apply();
             });
         };
         this.call = function(item) {
-            call.call(item, 'audio_video', this.peer.peer).then(function() {
-            	console.log(ctl.peer.peers.connection);
+            $call.call(item, 'audio_video', this.$peer.peer).then(function() {
+            	console.log(ctl.$peer.peers.connection);
             });
         };
         this.hangUp = function(item) {
-            call.hangUp(item);
+            this.$call.hangUp(item);
 		};
         this.bootstrapPeer = function() {
-            ctl.peer.startup($scope, ctl.peer.peer_prefix + ctl.user);
+            ctl.$peer.startup($scope, ctl.$peer.peer_prefix + ctl.user);
         };
 
         this.closeConnection = function(item) {
-            ctl.peer.closeConnections(item.peer_id);
+            ctl.$peer.closeConnections(item.peer_id);
         };
         this.closePeer = function() {
             ctl.user = undefined;
-            ctl.peer.peer_id = undefined;
-            ctl.peer.peer.destroy();
-            ctl.peer.peers.connection[c.peer] = undefined;
+            ctl.$peer.peer_id = undefined;
+            ctl.$peer.peer.destroy();
+            ctl.$peer.peers.connection[c.peer] = undefined;
         };
     }
 

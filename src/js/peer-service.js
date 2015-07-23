@@ -1,8 +1,8 @@
 (function() {
     var module = angular.module('mcbPeer', ['mcbPersist', 'mcbStream']);
 
-    module.service('call', ['$q', '$sce', 'stream', CallService])
-    module.service('peer', ['$q', '$rootScope', '$sce', 'persist', 'stream', 'call', PeerService])
+    module.service('$call', ['$q', '$sce', 'stream', CallService])
+    module.service('$peer', ['$q', '$rootScope', '$sce', 'persist', 'stream', '$call', PeerService])
 
     function CallService($q, $sce, streamSvc) {
         var service = this;
@@ -124,7 +124,7 @@
 
     }
 
-    function PeerService($q, $rootScope, $sce, persist, stream, call) {
+    function PeerService($q, $rootScope, $sce, persist, stream, $call) {
         var service = this;
         this.peers = {
             list: [],
@@ -158,7 +158,7 @@
                 console.log('My peer ID is: ' + id);
                 service.peer_id = id;
                 defer.resolve(id);
-                var reg = call.registerHandlers(service.peer);
+                var reg = $call.registerHandlers(service.peer);
                 defer.promise.then(reg);
                 console.log(service);
                 pollPeers(service);
