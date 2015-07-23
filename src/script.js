@@ -13,6 +13,7 @@
         };
 
         this.peer = peer;
+        this.call = call;
 
         $scope.$on('msgReceived', function(event, msg) {
             $scope.$apply(function() {
@@ -36,12 +37,12 @@
         };
         this.video = function(item) {
             // this.peer_id = item;
-            call.call(item, 'video', peer).then(function() {
+            call.call(item, 'video', this.peer.peer).then(function() {
                 $scope.$apply();
             });
         };
         this.call = function(item) {
-            call.call(item, 'audio_video', peer).then(function() {
+            call.call(item, 'audio_video', this.peer.peer).then(function() {
             	console.log(ctl.peer.peers.connection);
             });
         };

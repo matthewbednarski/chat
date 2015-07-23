@@ -21,12 +21,13 @@
             var defer = $q.defer();
             var s = undefined;
             if (streamType === 'video_only') {
-                s = stream.getVideoOnly();
+                s = streamSvc.getVideoOnly();
             } else if (streamType === 'audio') {
-                s = stream.getAudio();
+                s = streamSvc.getAudio();
             } else if (streamType === 'audio_video') {
-                s = stream.get();
+                s = streamSvc.get();
             }
+
             s.then(function(stream) {
                 var call = peer.call(peer_obj.peer_id, stream, {
                     metadata: {
