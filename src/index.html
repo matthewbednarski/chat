@@ -57,7 +57,7 @@
                         <div class="embed-responsive embed-responsive-16by9">
                             {{ ctl.$peer.peers.connection[item.peer_id].local_stream }}
                             <video class="embed-responsive-item" ng-src="{{ ctl.$call.current.local_stream }}"
-                            autoplay></video>
+                            autoplay muted="true"></video>
                         </div>
                     </div>
                 </div>
