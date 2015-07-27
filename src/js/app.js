@@ -96,10 +96,8 @@
         var ctl = this;
         this.$peer = $peer;
         this.$peer.peerlist = {};
-        this.$peer.peerlist.filter = undefined;
-        this.$peer.peerlist.collapse = {};
-        this.$peer.peerlist.collapse.class = 'collapsed';
-        this.$peer.peerlist.collapse.aria_expanded = false;
+        this.$peer.peerlist.filter = {};
+        this.$peer.peerlist.filter.peer_id = 'ast_';
 
         this.connect = function(peer) {
             var metadata = {};
