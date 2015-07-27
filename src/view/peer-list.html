@@ -1,0 +1,35 @@
+<div class="panel">
+    <div class="panel-heading">
+        <div class="row">
+            <div class="col-xs-2">
+                <!-- ng&#45;class="{{ctl.$peer.peerlist.collapse.class}}"  -->
+                <a data-toggle="collapse" class="collapsed" data-target="#collapseList">
+                    <i class="fa fa-chevron-down fa-lg fa-inverse"></i>
+                </a>
+            </div>
+            <div class="input-group form-group col-xs-10">
+                <div class="input-append">
+                    <input class="form-control" name="filter" placeholder="There are {{ ctl.$peer.peers.list.length }} peers available."
+                    ng-model="ctl.$peer.peerlist.filter.peer_id" />
+                </div>
+                <span class="input-group-addon"><i class="fa fa-filter fa-lg"></i></span>
+            </div>
+        </div>
+    </div>
+    <div class="panel-body collapse" id="collapseList">
+        <ul>
+            <li class="list-unstyled" ng-repeat="item in ctl.$peer.peers.list | filter:ctl.$peer.peer_list_filter">
+                <button ng-show="item.data !== undefined" class="btn btn-block btn-success" ng-click="ctl.connect(item);">
+                    <span class="badge pull-left"><i 
+						class="fa fa-check-circle-o fa-fw fa-lg"></i></span>
+                    {{item.peer_id}}
+                </button>
+                <button ng-show="item.data === undefined" class="btn btn-block btn-default" ng-click="ctl.connect(item);">
+                    <span class="badge pull-left"><i 
+						class="fa fa-sitemap fa-fw fa-lg"></i></span>
+                    {{item.peer_id}}
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>

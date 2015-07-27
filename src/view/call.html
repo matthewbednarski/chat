@@ -1,0 +1,17 @@
+<div ng-show="ctl.$call.current !== undefined">
+    <div class="container col-sm-7 col-md-7 col-lg-7">
+        <div class="embed-responsive embed-responsive-4by3">
+            {{ ctl.$peer.peers.connection[item.peer_id].remote_stream }}
+            <!-- service.peers.connection[c.peer].remote_stream = URL.createObjectURL(remoteStream); -->
+            <video class="embed-responsive-item" ng-src="{{ ctl.$call.current.remote_stream }}"
+            autoplay></video>
+        </div>
+    </div>
+    <div class="container col-sm-5 col-md-5 col-lg-5">
+        <div class="embed-responsive embed-responsive-16by9">
+            {{ ctl.$peer.peers.connection[item.peer_id].local_stream }}
+            <video class="embed-responsive-item" ng-src="{{ ctl.$call.current.local_stream }}"
+            autoplay muted="true"></video>
+        </div>
+    </div>
+</div>

@@ -135,24 +135,52 @@
 
         this.startup = function() {
             var defer = $q.defer();
-            service.peer = new Peer({
-                key: 'lwjd5qra8257b9',
-                // key: 'x7fwx2kavpy6tj4i',
-                // Set highest debug level (log everything!).
-                debug: 3,
+            if (service.peer_id !== undefined && service.peer_id !== '') {
+                service.peer = new Peer(service.peer_id,{
+                    key: 'lwjd5qra8257b9',
+                    // key: 'x7fwx2kavpy6tj4i',
+                    // Set highest debug level (log everything!).
+                    debug: 3,
 
-                // Set a logging function:
-                logFunction: function() {
-                    var copy = Array.prototype.slice.call(arguments).join(' ');
-                    $('.log').append(copy + '<br>');
-                },
+                    // Set a logging function:
+                    logFunction: function() {
+                        var copy = Array.prototype.slice.call(arguments).join(' ');
+                        $('.log').append(copy + '<br>');
+                    },
 
-                // Use a TURN server for more network support
-                config: {
-                    'iceServers': [{
-                        url: 'stun:stun.l.google.com:19302'
-                    }]
-                }
+                    // Use a TURN server for more network support
+                    config: {
+                        'iceServers': [{
+                            url: 'stun:stun.l.google.com:19302'
+                        }]
+                    }
+                });
+            }else{
+                service.peer = new Peer({
+                    key: 'lwjd5qra8257b9',
+                    // key: 'x7fwx2kavpy6tj4i',
+                    // Set highest debug level (log everything!).
+                    debug: 3,
+
+                    // Set a logging function:
+                    logFunction: function() {
+                        var copy = Array.prototype.slice.call(arguments).join(' ');
+                        $('.log').append(copy + '<br>');
+                    },
+
+                    // Use a TURN server for more network support
+                    config: {
+                        'iceServers': [{
+                            url: 'stun:stun.l.google.com:19302'
+                        }]
+                    }
+                });
+			}
+            service.peer.on('error', function(err) {
+            	console.error(err);
+            	if(err.type === 'disconnected'){
+            		service.peer.reconnect();
+				}
             });
             service.peer.on('open', function(id) {
                 console.log('My peer ID is: ' + id);
@@ -171,7 +199,6 @@
         };
         this.listConnections = function() {
             var defer = $q.defer();
-
             var conns = _.chain(_.keys(service.peers.connection))
                 .map(function(key) {
                     return {
@@ -296,7 +323,7 @@
                     })
                     .value();
                 angular.copy(list, this.peers.list);
-                console.log(this.peers);
+                // console.log(this.peers);
                 defer.resolve(this.peers);
             };
             cb = _.bind(cb, service, defer);

@@ -13,7 +13,7 @@ a[ng-click]{
 	height: auto !important;
 }
 
-a.collapsed i.glyphicon.glyphicon-chevron-down {
+a.collapsed i.fa.fa-chevron-down {
 	-webkit-transform: rotate(90deg);
 	-moz-transform:    rotate(90deg);
 	-ms-transform:     rotate(90deg);

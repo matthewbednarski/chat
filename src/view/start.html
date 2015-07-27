@@ -1,0 +1,7 @@
+<div class="container">
+    <form>
+        <input ng-model="ctl.$peer.peer_id" class="form-control" />
+        <button ng-show="ctl.$peer.peer_id === undefined" class="btn btn-danger btn-inverse" type="submit" ng-click="ctl.bootstrapPeer();">Start</button>
+        <button ng-show="ctl.$peer.peer_id !== undefined" class="btn btn-danger" ng-click="ctl.closePeer();">End</button>
+    </form>
+</div>
