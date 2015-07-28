@@ -50,6 +50,11 @@
                             templateUrl: 'view/chat.html',
                             controller: 'ChatController',
                             controllerAs: 'ctl'
+                        },
+                        'call': {
+                            templateUrl: 'view/call.html',
+                            controller: 'CallController',
+                            controllerAs: 'ctl'
                         }
                     }
                 });
@@ -69,20 +74,11 @@
     }
 
     function StartController($q, $scope, $peer) {
-        this.title = "Welcome ";
         var ctl = this;
-        this.use = {
-            video: false,
-            audio: true
-        };
         this.$peer = $peer;
 
         this.bootstrapPeer = function() {
             ctl.$peer.startup();
-        };
-
-        this.closeConnection = function(item) {
-            ctl.$peer.closeConnections(item.peer_id);
         };
         this.closePeer = function() {
             ctl.user = undefined;
@@ -165,6 +161,7 @@
             ctl.$peer.peer_id = undefined;
             ctl.$peer.peer.destroy();
             ctl.$peer.peers.connection[c.peer] = undefined;
+            ctl.$peer.bootstrapped = false;
         };
     }
 

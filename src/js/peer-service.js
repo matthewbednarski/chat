@@ -126,6 +126,7 @@
 
     function PeerService($q, $rootScope, $sce, persist, stream, $call) {
         var service = this;
+        this.bootstrapped = false;
         this.peers = {
             list: [],
             messages: [],
@@ -186,6 +187,7 @@
                 console.log('My peer ID is: ' + id);
                 service.peer_id = id;
                 defer.resolve(id);
+                service.bootstrapped = true;
                 var reg = $call.registerHandlers(service.peer);
                 defer.promise.then(reg);
                 console.log(service);

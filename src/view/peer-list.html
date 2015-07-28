@@ -18,7 +18,7 @@
     </div>
     <div class="panel-body collapse" id="collapseList">
         <ul>
-            <li class="list-unstyled" ng-repeat="item in ctl.$peer.peers.list | filter:ctl.$peer.peer_list_filter">
+            <li class="list-unstyled" ng-repeat="item in ctl.$peer.peers.list | filter:ctl.$peer.peerlist.filter">
                 <button ng-show="item.data !== undefined" class="btn btn-block btn-success" ng-click="ctl.connect(item);">
                     <span class="badge pull-left"><i 
 						class="fa fa-check-circle-o fa-fw fa-lg"></i></span>
