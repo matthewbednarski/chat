@@ -106,8 +106,8 @@
     function CallController($q, $scope, $call) {
         var ctl = this;
         this.$call = $call;
-        this.hangUp = function(item) {
-            this.$call.hangUp(item);
+        this.hangUp = function() {
+            this.$call.hangUp();
         };
     }
 
@@ -148,6 +148,9 @@
             $call.call(item, 'audio_video', this.$peer.peer).then(function() {
                 console.log(ctl.$peer.peers.connection);
             });
+        };
+        this.hangUp = function(item) {
+            this.$call.hangUp();
         };
         this.bootstrapPeer = function() {
             ctl.$peer.startup($scope, ctl.$peer.peer_prefix + ctl.user);
