@@ -1,11 +1,7 @@
 <div class="panel">
-                    <!-- ng&#45;model="ctl.$peer.peerlist.filter.peer_id" /> -->
-    <div class="panel-heading h2">
-		List
-    </div>
-    <div class="panel-body collapse" id="collapseList">
+    <div class="panel-body">
         <ul>
-            <li class="list-unstyled" ng-repeat="item in ctl.$peer.peers.list | filter:ctl.$peer.peer_list_filter">
+            <li class="list-unstyled" ng-repeat="item in ctl.$peer.peers.list | filter:ctl.$peer.peerlist.filter">
                 <button ng-show="item.data !== undefined" class="btn btn-block btn-success" ng-click="ctl.connect(item);">
                     <span class="badge pull-left"><i 
 						class="fa fa-check-circle-o fa-fw fa-lg"></i></span>
@@ -13,7 +9,7 @@
                 </button>
                 <button ng-show="item.data === undefined" class="btn btn-block btn-default" ng-click="ctl.connect(item);">
                     <span class="badge pull-left"><i 
-						class="fa fa-sitemap fa-fw fa-lg"></i></span>
+						class="fa fa-info fa-fw fa-lg"></i></span>
                     {{item.peer_id}}
                 </button>
             </li>
