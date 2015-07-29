@@ -8,7 +8,7 @@
         var service = this;
         service.previous = [];
 
-        this.hangUp = function(peer_obj) {
+        this.hangUp = function() {
             if (service.current !== undefined) {
                 if (service.current.call !== undefined) {
                     service.current.call.close();

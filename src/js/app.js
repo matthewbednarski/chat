@@ -3,9 +3,7 @@
         .config(function($stateProvider, $urlRouterProvider) {
             $urlRouterProvider.otherwise('/');
             $stateProvider
-                .state('call', {
-                    url: '/call',
-                    views: {
+                .state('call', { url: '/call', views: {
                         'call': {
                             templateUrl: 'view/call.html',
                             controller: 'CallController',
@@ -108,7 +106,7 @@
     function CallController($q, $scope, $call) {
         var ctl = this;
         this.$call = $call;
-        this.hangUp = function(item) {
+        this.hangUp = function() {
             this.$call.hangUp(item);
         };
     }
@@ -150,6 +148,9 @@
             $call.call(item, 'audio_video', this.$peer.peer).then(function() {
                 console.log(ctl.$peer.peers.connection);
             });
+        };
+        this.hangUp = function(item) {
+            this.$call.hangUp();
         };
         this.bootstrapPeer = function() {
             ctl.$peer.startup($scope, ctl.$peer.peer_prefix + ctl.user);
