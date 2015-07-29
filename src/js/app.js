@@ -48,6 +48,11 @@
                             templateUrl: 'view/chat.html',
                             controller: 'ChatController',
                             controllerAs: 'ctl'
+                        },
+                        'call': {
+                            templateUrl: 'view/call.html',
+                            controller: 'CallController',
+                            controllerAs: 'ctl'
                         }
                     }
                 });
